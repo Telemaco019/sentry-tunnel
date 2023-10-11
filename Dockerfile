@@ -44,6 +44,9 @@ RUN cargo build --target x86_64-unknown-linux-musl --release
 FROM alpine:3.14 as alpine
 RUN apk add -U --no-cache ca-certificates
 
+# Add non-priviledged user.
+RUN adduser -H -D -u 1000 sentry_tunnel
+
 # ==========================#
 # Final image				#
 # ==========================#
@@ -59,7 +62,11 @@ WORKDIR /sentry_tunnel
 # Copy our build
 COPY --from=builder /sentry_tunnel/target/x86_64-unknown-linux-musl/release/sentry_tunnel ./
 COPY --from=alpine /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-# Use an unprivileged user.
-USER sentry_tunnel:sentry_tunnel
+
+# Copy non-priviledged user
+COPY --from=0 /etc/passwd /etc/passwd
+
+# Set non-priviledged user
+USER 1001
 
 CMD ["/sentry_tunnel/sentry_tunnel"]

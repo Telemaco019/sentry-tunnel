@@ -1,18 +1,17 @@
-name: Docker Image CI
+name: Release
 
 on:
-  workflow_dispatch:
   push:
-    branches:
-      - "main"
-    paths-ignore:
-      - ".github/**"
-      - "*.md"
-      - "docs/**"
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
 
 jobs:
-  deploy:
+  release:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       - name: Login to GitHub container registry
@@ -26,4 +25,4 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: ghcr.io/telemaco019/sentry-tunnel:latest
+          tags: ghcr.io/telemaco019/sentry-tunnel:${{ github.ref_name }}
